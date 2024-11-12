@@ -10,6 +10,7 @@ import os
 from datetime import datetime, timedelta
 
 from streamlit import selectbox
+from functions import *
 
 #### SECTION INTRODUCITON ####
 
@@ -35,17 +36,15 @@ info_selected_country = data_pays[data_pays["Pays"] == selected_country].iloc[0]
 
 # Informations relatives au pays choisi
 code_ISO3A = info_selected_country["ISO3"]
-lon_min = info_selected_country["Lon_min"]
-lon_max = info_selected_country["Lon_max"]
-lat_min = info_selected_country["Lat_min"]
-lat_max = info_selected_country["Lat_max"]
 
-### SELECTION CHOIX D UNE TEMPETE DE REFERENCE ####
+# Grille du pays
+country_grid = grille_pays(data_pays,code_ISO3A)
+
+### SECTION CHOIX D UNE TEMPETE DE REFERENCE ####
 
 # Chargement de la base des tempêtes de références
 data_tempetes = pd.read_excel("Tempete_references.xlsx")
 data_tempetes['Date'] = pd.to_datetime(data_tempetes['Date']).dt.date
-
 
 # Titre de la section
 st.header("Choix de la date")
@@ -78,3 +77,65 @@ else :
 
     if code_ISO3A != code_ISO3A_tempete :
         st.warning(" Attention : Le pays choisi ne correspond pas au pays de la tempête sélectionnée")
+
+
+### SECTION APPEL DE L'API ####
+
+# Titre de la section
+st.header("Appel de l'API Copernicus")
+
+# Choix de la variable vent
+wind_selected = st.radio("Choix de la variable de vent",("rafale","soutenu_10m","soutenu_100m"))
+
+# Extraction du jour, du mois et de l'année
+year_selected = [selected_date.year]
+month_selected = [selected_date.month]
+day_selected = [selected_date.day]
+
+# Extraction des heures
+hours = [
+        "00:00", "01:00", "02:00",
+        "03:00", "04:00", "05:00",
+        "06:00", "07:00", "08:00",
+        "09:00", "10:00", "11:00",
+        "12:00", "13:00", "14:00",
+        "15:00", "16:00", "17:00",
+        "18:00", "19:00", "20:00",
+        "21:00", "22:00", "23:00"]
+
+option_hours = st.radio("Choisissez une option :",("Selectionner toutes les heures","Selectionner des heures specifiques"))
+if option_hours == "Selectionner toutes les heures":
+    time_selected = hours
+else:
+    time_selected = st.multiselect("Choisissez des heures specifiques",hours)
+
+#### PARAMETRAGE HEXAGONE ####
+
+resolution_base = 15
+#resolution_parent = 4 # Fixé directement ou choix utilisateur
+
+# Titre de la section
+st.title("Selection de la résolution")
+st.write("Une résolution basse correspond à de grands hexagones (conseil : choisir la résolution 4 ou 5)")
+
+# Choix de la resolution parent
+resolution_parent = st.slider("Choisissez une résolution hexagonale",min_value=1,max_value=15,value=4)
+if resolution_parent > resolution_base:
+    st.error(f"Erreur : La resolution doit être inférieure à {resolution_base}")
+else: # Affichage de la surface en km² ou m² en fonction de la résolution
+    if resolution_parent <= 8:
+        area_km2 = round(h3.cell_area(h3.latlng_to_cell(48.8566, 2.3522, resolution_parent),unit='km^2'))# surface d'un hexagone sur un pt aléatoire (Paris)
+        st.success(f"Vous avez sélectionné la résolution {resolution_parent} d'une surface de {area_km2} km²")
+    else :
+        area_km2 = round(h3.cell_area(h3.latlng_to_cell(48.8566, 2.3522, resolution_parent),unit='m^2'))# surface d'un hexagone sur un pt aléatoire (Paris)
+        st.success(f"Vous avez sélectionné la résolution {resolution_parent} d'une surface de {area_km2} m²")
+
+
+#### TELECHARGEMENT DONNEES CLIMATIQUES ####
+
+# Selection des variables
+variables_selected = choix_variable(wind_selected)
+
+# Nom du fichier pour le téléchargement
+filename = name_file(code_ISO3A,year_selected,month_selected,day_selected,time_selected,wind_selected,version=1)
+
