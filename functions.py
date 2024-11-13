@@ -78,7 +78,7 @@ def choix_variable(choix):
     return variables_selected
 
 
-def requete_api(filename, variables_selected, year_selected, month_selected, day_selected, time_selected, country_grid):
+def requete_api(filename,name_folder, variables_selected, year_selected, month_selected, day_selected, time_selected, country_grid):
     """
     Objectif : Requeter l'API Copernicus en fonction des choix faits par l'utilisateur
     """
@@ -101,11 +101,18 @@ def requete_api(filename, variables_selected, year_selected, month_selected, day
         "area": country_grid
     }
 
+    # Sous dossier pour enregistrer les fichiers .nc
+    folder = name_folder
+
+    # Création du sous dossier si il n'existe pas
+    os.makedirs(folder, exist_ok=True)
+    full_path = os.path.join(folder, filename)
+
     # Récupération des données et téléchargement
     if filename in os.listdir():
         return f"Fichier {filename} déjà existant"
     else:
-        client.retrieve(dataset, request).download(target=filename)
+        client.retrieve(dataset, request).download(target=full_path)
         return f"Fichier {filename} a été téléchargé avec succès"
 
 
@@ -303,10 +310,10 @@ def legende_carte(choix):
     if choix == "rafale":
         legend_html = """
             <div style="position: fixed; 
-                        bottom: 20px; left: 20px; width: 150px; height: 170px; 
+                        bottom: 20px; left: 20px; width: 140x; height: 150px; 
                         background-color: white; border:2px solid grey; 
                         z-index:9999; font-size:14px;
-                        padding: 10px;">
+                         padding: 10px;">
                 <b style="display: inline-block; margin-bottom: 8px;">Légende Rafale</b><br>
                 <i style="background:green; width: 20px; height: 20px; display: inline-block;"></i> < 30 km/h<br>
                 <i style="background:yellow; width: 20px; height: 20px; display: inline-block;"></i> 31 - 70 km/h<br>
@@ -319,7 +326,7 @@ def legende_carte(choix):
     elif choix == "soutenu_10m":
         legend_html = """
             <div style="position: fixed; 
-                        bottom: 20px; left: 20px; width: 150px; height: 170px;
+                        bottom: 20px; left: 20px; width: 140px; height: 150px;
                         background-color: white; border:2px solid grey; 
                         z-index:9999; font-size:14px;
                         padding: 10px;">
@@ -335,7 +342,7 @@ def legende_carte(choix):
     elif choix == "soutenu_100m":
         legend_html = """
             <div style="position: fixed; 
-                        bottom: 20px; left: 20px; width: 150px; height: 170px;
+                        bottom: 20px; left: 20px; width: 140px; height: 150px;
                         background-color: white; border:2px solid grey; 
                         z-index:9999; font-size:14px;
                         padding: 10px;">
@@ -367,8 +374,8 @@ def titre_carte(choix,country_selected,day_selected,month_selected,year_selected
         month_selected[0]) + "-" + str(year_selected[0])
 
     # En HTML
-    titre_html = f'''
-         <h3 align="center" style="font-size:20px"><b>{titre}</b></h3>
-         '''
+    titre_html = f"""
+    <h1 style='text-align: center; font-size: 24px;'>{titre}</h1>
+    """
 
     return titre_html
