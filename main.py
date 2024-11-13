@@ -26,9 +26,13 @@ st.write(
     "L'objectif est de télécharger des données provenenant de Copernicus et d'afficher des données de vent seln la date voulue "
 )
 
-# Récupération de l'URL
-cdsapi_url = st.secrets["cdsapirc"]["url"]
-cdsapi_key = st.secrets["cdsapirc"]["key"]
+# Récupération de l'URL (version sécurisée)
+#cdsapi_url = st.secrets["cdsapirc"]["url"]
+#cdsapi_key = st.secrets["cdsapirc"]["key"]
+
+# Récupération de l'URL (version non sécurisée attention)
+cdsapi_url = "https://cds.climate.copernicus.eu/api"
+cdsapi_key = "db2d03e3-02f3-4b14-8f2c-ffcc72a94988" # dépend de l'utilisateur
 
 #### SECTION CHOIX DU PAYS #####
 
