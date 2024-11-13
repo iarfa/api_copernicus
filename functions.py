@@ -108,6 +108,8 @@ def choix_variable(choix):
 
 
 def requete_api(
+    cdsapi_url,
+    cdsapi_key,
     filename,
     name_folder,
     variables_selected,
@@ -124,7 +126,7 @@ def requete_api(
     dataset = "reanalysis-era5-single-levels"
 
     # Appel de l'API
-    client = cdsapi.Client()
+    client = cdsapi.Client(url=cdsapi_url,key=cdsapi_key)
 
     # Requête d'extraction (Show API request)
     request = {

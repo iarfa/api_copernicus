@@ -26,6 +26,10 @@ st.write(
     "L'objectif est de télécharger des données provenenant de Copernicus et d'afficher des données de vent seln la date voulue "
 )
 
+# Récupération de l'URL
+cdsapi_url = st.secrets["cdsapirc"]["url"]
+cdsapi_key = st.secrets["cdsapirc"]["key"]
+
 #### SECTION CHOIX DU PAYS #####
 
 # Chargement de la base des pays
@@ -195,7 +199,6 @@ with st.sidebar:
                 f"Vous avez sélectionné la résolution {resolution_parent} d'une surface de {area_km2} m²"
             )
 
-
 #### TELECHARGEMENT DONNEES CLIMATIQUES ####
 
 # Selection des variables
@@ -224,6 +227,8 @@ if st.button("Commencer le téléchargement"):
     else:
         st.write("Télechargement des données : ")
         requete_api(
+            cdsapi_url,
+            cdsapi_key,
             filename,
             name_folder,
             variables_selected,
