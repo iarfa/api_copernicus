@@ -199,7 +199,6 @@ with st.sidebar:
                 f"Vous avez sélectionné la résolution {resolution_parent} d'une surface de {area_km2} m²"
             )
 
-
 #### TELECHARGEMENT DONNEES CLIMATIQUES ####
 
 # Selection des variables
