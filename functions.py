@@ -1,12 +1,17 @@
+"""
+Fonctions utilisées dans le ma
+"""
+
+import os
+
 # Import de librairies
 import cdsapi
 import folium
-import numpy as np
 import h3
-import os
-
+import numpy as np
 
 # Liste de fonctions
+
 
 def grille_pays(data_pays, code_iso3a):
     """
@@ -28,7 +33,15 @@ def grille_pays(data_pays, code_iso3a):
     return [lat_max, lon_min, lat_min, lon_max]
 
 
-def name_file(country_selected, year_selected, month_selected, day_selected, time_selected, choix, version=1):
+def name_file(
+    country_selected,
+    year_selected,
+    month_selected,
+    day_selected,
+    time_selected,
+    choix,
+    version=1,
+):
     """
     Objectif :
         Créer un nom automatique lors de la création d'un fichier de téléchargement
@@ -46,14 +59,28 @@ def name_file(country_selected, year_selected, month_selected, day_selected, tim
 
     # Le fichier prend en compte toute la jounrée ou seulement quelques heures
     if (
-            len(set(time_selected)) == 24):  # Si il y a 24 valeurs différentes sur 24 possibles, alors toute la journée est sélectionnée
+        len(set(time_selected)) == 24
+    ):  # Si il y a 24 valeurs différentes sur 24 possibles, alors toute la journée est sélectionnée
         type_day = "all_day"
     else:
         type_day = "part_day_v" + str(version)
 
     # Nom du fichier
-    final_name = "era_data_" + str(country_selected) + "_" + str(year_selected[0]) + "_" + str(
-        month_selected[0]) + "_" + str(day_selected[0]) + "_" + type_day + "_" + str(choix) + ".nc"
+    final_name = (
+        "era_data_"
+        + str(country_selected)
+        + "_"
+        + str(year_selected[0])
+        + "_"
+        + str(month_selected[0])
+        + "_"
+        + str(day_selected[0])
+        + "_"
+        + type_day
+        + "_"
+        + str(choix)
+        + ".nc"
+    )
 
     return final_name
 
@@ -73,12 +100,23 @@ def choix_variable(choix):
     elif choix == "rafale":
         variables_selected = ["instantaneous_10m_wind_gust"]
     else:
-        raise ValueError("Erreur : choix non reconnu. Utilisez 'rafale', 'soutenu_10m' ou 'soutenu_100m'.")
+        raise ValueError(
+            "Erreur : choix non reconnu. Utilisez 'rafale', 'soutenu_10m' ou 'soutenu_100m'."
+        )
 
     return variables_selected
 
 
-def requete_api(filename,name_folder, variables_selected, year_selected, month_selected, day_selected, time_selected, country_grid):
+def requete_api(
+    filename,
+    name_folder,
+    variables_selected,
+    year_selected,
+    month_selected,
+    day_selected,
+    time_selected,
+    country_grid,
+):
     """
     Objectif : Requeter l'API Copernicus en fonction des choix faits par l'utilisateur
     """
@@ -98,7 +136,7 @@ def requete_api(filename,name_folder, variables_selected, year_selected, month_s
         "time": time_selected,
         "data_format": "netcdf",
         "download_format": "unarchived",
-        "area": country_grid
+        "area": country_grid,
     }
 
     # Sous dossier pour enregistrer les fichiers .nc
@@ -114,7 +152,6 @@ def requete_api(filename,name_folder, variables_selected, year_selected, month_s
     else:
         client.retrieve(dataset, request).download(target=full_path)
         return f"Fichier {filename} a été téléchargé avec succès"
-
 
 def traitement_data_wind(dataset, choix):
     """
@@ -133,34 +170,36 @@ def traitement_data_wind(dataset, choix):
     if choix == "soutenu_10m":
 
         # Valeurs de vent maximale à la journée selon la direction u -> format numpy.ndarray
-        u_wind_time_value_ex = dataset["u10"].max(dim='valid_time').values
+        u_wind_time_value_ex = dataset["u10"].max(dim="valid_time").values
 
         # Valeurs de vent maximale à la journée selon la direction v -> format numpy.ndarray
-        v_wind_time_value_ex = dataset["v10"].max(dim='valid_time').values
+        v_wind_time_value_ex = dataset["v10"].max(dim="valid_time").values
 
         # Magnitude du vent , w_mag = sqrt(u² +v²) et en km/H -> *3.6
-        wind_mag = 3.6 * np.sqrt(u_wind_time_value_ex ** 2 + v_wind_time_value_ex ** 2)
+        wind_mag = 3.6 * np.sqrt(u_wind_time_value_ex**2 + v_wind_time_value_ex**2)
 
     # Pour un vent soutenu 100 m
     elif choix == "soutenu_100m":
 
         # Valeurs de vent maximale à la journée selon la direction u -> format numpy.ndarray
-        u_wind_time_value_ex = dataset["u100"].max(dim='valid_time').values
+        u_wind_time_value_ex = dataset["u100"].max(dim="valid_time").values
 
         # Valeurs de vent maximale à la journée selon la direction v -> format numpy.ndarray
-        v_wind_time_value_ex = dataset["v100"].max(dim='valid_time').values
+        v_wind_time_value_ex = dataset["v100"].max(dim="valid_time").values
 
         # Magnitude du vent , w_mag = sqrt(u² +v²) et en km/H -> *3.6
-        wind_mag = 3.6 * np.sqrt(u_wind_time_value_ex ** 2 + v_wind_time_value_ex ** 2)
+        wind_mag = 3.6 * np.sqrt(u_wind_time_value_ex**2 + v_wind_time_value_ex**2)
 
     # Pour des rafales de vent
     elif choix == "rafale":
 
         # Magnitude du vent
-        wind_mag = 3.6 * dataset["i10fg"].max(dim='valid_time').values
+        wind_mag = 3.6 * dataset["i10fg"].max(dim="valid_time").values
 
     else:
-        raise ValueError("Erreur : choix non reconnu. Utilisez 'rafale', 'soutenu_10m' ou 'soutenu_100m'.")
+        raise ValueError(
+            "Erreur : choix non reconnu. Utilisez 'rafale', 'soutenu_10m' ou 'soutenu_100m'."
+        )
 
     return longitudes, latitudes, wind_mag
 
@@ -213,7 +252,9 @@ def calcul_hexagone(latitudes, longitudes, wind, resolution_base, resolution_par
             if hex_index_parent not in parent_hex_values:
                 parent_hex_values[hex_index_parent] = wind_value
             else:
-                parent_hex_values[hex_index_parent] = max(parent_hex_values[hex_index_parent], wind_value)
+                parent_hex_values[hex_index_parent] = max(
+                    parent_hex_values[hex_index_parent], wind_value
+                )
 
     return parent_hex_values
 
@@ -230,42 +271,44 @@ def get_wind_color(wind_value, choix):
 
     if choix == "rafale":
         if wind_value < 31:
-            return 'green'
+            return "green"
         elif wind_value < 71:
-            return 'yellow'
+            return "yellow"
         elif wind_value < 101:
-            return 'orange'
+            return "orange"
         elif wind_value < 131:
-            return '#FF8C00'  # Orange foncé
+            return "#FF8C00"  # Orange foncé
         else:
-            return 'red'
+            return "red"
 
     elif choix == "soutenu_10m":
         if wind_value < 31:
-            return 'green'
+            return "green"
         elif wind_value < 71:
-            return 'yellow'
+            return "yellow"
         elif wind_value < 101:
-            return 'orange'
+            return "orange"
         elif wind_value < 131:
-            return '#FF8C00'  # Orange foncé
+            return "#FF8C00"  # Orange foncé
         else:
-            return 'red'
+            return "red"
 
     elif choix == "soutenu_100m":
         if wind_value < 31:
-            return 'green'
+            return "green"
         elif wind_value < 71:
-            return 'yellow'
+            return "yellow"
         elif wind_value < 131:
-            return 'orange'
+            return "orange"
         elif wind_value < 171:
-            return '#FF8C00'  # Orange foncé
+            return "#FF8C00"  # Orange foncé
         else:
-            return 'red'
+            return "red"
 
     else:
-        raise ValueError("Erreur : choix non reconnu. Utilisez 'rafale', 'soutenu_10m' ou 'soutenu_100m'.")
+        raise ValueError(
+            "Erreur : choix non reconnu. Utilisez 'rafale', 'soutenu_10m' ou 'soutenu_100m'."
+        )
 
 
 def affichage_hexagones(carte, hexagones, choix):
@@ -293,7 +336,7 @@ def affichage_hexagones(carte, hexagones, choix):
             fill=True,
             fill_color=color,
             fill_opacity=0.2,
-            popup=f"Vent soutenu: {max_wind_value:.2f} km/h"
+            popup=f"Vent soutenu: {max_wind_value:.2f} km/h",
         ).add_to(carte)
 
     return carte
@@ -356,12 +399,14 @@ def legende_carte(choix):
         """
 
     else:
-        raise ValueError("Erreur : choix non reconnu. Utilisez 'rafale', 'soutenu_10m' ou 'soutenu_100m'.")
+        raise ValueError(
+            "Erreur : choix non reconnu. Utilisez 'rafale', 'soutenu_10m' ou 'soutenu_100m'."
+        )
 
     return legend_html
 
 
-def titre_carte(choix,country_selected,day_selected,month_selected,year_selected):
+def titre_carte(choix, country_selected, day_selected, month_selected, year_selected):
     """
     Objectif : Adapter la légende à la variable utilisée (cf fichier Echelle_vent.xlsx)
 
@@ -370,8 +415,18 @@ def titre_carte(choix,country_selected,day_selected,month_selected,year_selected
     """
 
     # Titre
-    titre = "Carte " + str(choix) + " " + str(country_selected) + " " + str(day_selected[0]) + "-" + str(
-        month_selected[0]) + "-" + str(year_selected[0])
+    titre = (
+        "Carte "
+        + str(choix)
+        + " "
+        + str(country_selected)
+        + " "
+        + str(day_selected[0])
+        + "-"
+        + str(month_selected[0])
+        + "-"
+        + str(year_selected[0])
+    )
 
     # En HTML
     titre_html = f"""
