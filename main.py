@@ -23,7 +23,7 @@ st.set_page_config(
 st.title("API données de vent Copernicus")
 st.write("Bienvenue dans l'API de téléchargement Copernicus")
 st.write(
-    "L'objectif est de télécharger des données provenenant de Copernicus et d'afficher des données de vent seln la date voulue "
+    "L'objectif est de télécharger des données provenenant de Copernicus et d'afficher des données de vent selon la date voulue "
 )
 
 # Récupération de l'URL (version sécurisée)
@@ -159,12 +159,12 @@ with st.sidebar:
 
     option_hours = st.radio(
         "Choisissez une option :",
-        ("Selectionner toutes les heures", "Selectionner des heures specifiques"),
+        ("Sélectionner toutes les heures", "Sélectionner des heures spécifiques"),
     )
-    if option_hours == "Selectionner toutes les heures":
+    if option_hours == "Sélectionner toutes les heures":
         time_selected = hours
     else:
-        time_selected = st.multiselect("Choisissez des heures specifiques", hours)
+        time_selected = st.multiselect("Sélectionner des heures spécifiques", hours)
 
     #### PARAMETRAGE HEXAGONE ####
 
@@ -174,9 +174,11 @@ with st.sidebar:
     # Titre de la section
     st.title("Selection de la résolution")
     st.write(
-        "Une résolution basse correspond à de grands hexagones (conseil : choisir la résolution 4 ou 5)"
+        "Une résolution basse correspond à de grands hexagones"
     )
-
+    st.warning(
+        "Conseil : Les résolutions 4 et 5 sont les plus adaptées "
+    )
     # Choix de la resolution parent
     resolution_parent = st.slider(
         "Choisissez une résolution hexagonale", min_value=1, max_value=15, value=4
@@ -229,7 +231,7 @@ if st.button("Commencer le téléchargement"):
         st.write("Le fichier existe déjà : ")
 
     else:
-        st.write("Télechargement des données : ")
+        st.write("Télechargement des données")
         requete_api(
             cdsapi_url,
             cdsapi_key,

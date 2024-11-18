@@ -432,7 +432,7 @@ def titre_carte(choix, country_selected, day_selected, month_selected, year_sele
 
     # En HTML
     titre_html = f"""
-    <h1 style='text-align: center; font-size: 24px;'>{titre}</h1>
-    """
+     <h1 style='margin-left: 200px; font-size: 24px;'>{titre}</h1>
+     """
 
     return titre_html
