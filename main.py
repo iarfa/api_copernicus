@@ -245,13 +245,10 @@ if st.button("Commencer le téléchargement"):
             country_grid,
         )
 
-#### VISUALISATION CARTOGRAPHIQUE ####
+if st.button("Afficher la carte"):
+    st.session_state.clear()  # Réinitialise tout le session_state
 
-# Titre de la carte
-title_carte = titre_carte(
-    wind_selected, country_selected, day_selected, month_selected, year_selected
-)
-st.markdown(title_carte, unsafe_allow_html=True)
+#### VISUALISATION CARTOGRAPHIQUE ####
 
 # Centre de la carte
 map_center_pt = map_center(country_grid)
@@ -308,6 +305,7 @@ try:
                 st.session_state.longitudes = longitudes
                 st.session_state.latitudes = latitudes
                 st.session_state.wind_mag = wind_mag
+
             else:
                 # Utiliser les données déjà extraites
                 longitudes = st.session_state.longitudes
@@ -333,6 +331,12 @@ try:
                 st.session_state.carte_with_hexagons = (
                     True  # Marquer que la carte a été mise à jour
                 )
+
+            # Titre de la carte
+            title_carte = titre_carte(
+                wind_selected, country_selected, day_selected, month_selected, year_selected
+            )
+            st.markdown(title_carte, unsafe_allow_html=True)
 
             # Affichage de la carte
             st_folium(st.session_state.carte, width=600, height=550)
