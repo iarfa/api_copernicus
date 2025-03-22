@@ -1,5 +1,5 @@
 """
-Fonctions utilisées dans le ma
+Fonctions utilisées dans le main
 """
 
 import os
